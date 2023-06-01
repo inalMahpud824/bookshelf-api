@@ -14,6 +14,7 @@ const addBookHandler = (request, h) => {
     reading,
   } = request.payload;
 
+  //apakah ada properti nama
   if (!name) {
     const response = h.response({
       status: "fail",
@@ -23,26 +24,24 @@ const addBookHandler = (request, h) => {
     return response;
   }
 
+  //apakah ada jumlah halaman lebih sedikit dari jumlah yang dibaca
   if (pageCount < readPage) {
     const response = h.response({
       status: "fail",
-      message:"Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
+      message:
+        "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
     });
     response.code(400);
     return response;
   }
 
   const id = nanoid(15);
-  const insertedAtd = new Date().toISOString();
-  const updatedAt = insertedAtd;
+  const insertedAt = new Date().toISOString();
+  const updatedAt = insertedAt;
   let finished = false;
   if (pageCount === readPage) {
     finished = true;
   }
-
-
-
-
   const newBooks = {
     id,
     name,
@@ -55,12 +54,10 @@ const addBookHandler = (request, h) => {
     finished,
     reading,
     updatedAt,
+    insertedAt,
   };
-
   books.push(newBooks);
-
   const isSuccess = books.filter((book) => book.id === id).length > 0;
-  // const haveName =  books.filter((book) => book.name === name).length > 0;
 
   if (isSuccess) {
     const response = h.response({
@@ -95,4 +92,25 @@ const getAllBookHandler = () => {
   };
 };
 
-module.exports = { addBookHandler, getAllBookHandler };
+//fungsi menampilkan data buku berdasarkan id
+const getBookByIdHandler = (request, h) => {
+  const { id } = request.params;
+  const book = books.filter((n) => n.id === id)[0];
+
+  if (book !== undefined) {
+    return {
+      status: "success",
+      data: {
+        book,
+      },
+    };
+  }
+
+  const response = h.response({
+    status: "fail",
+    message: "halaman tidak ditemukan",
+  });
+  response.code(404);
+  return response;
+};
+module.exports = { addBookHandler, getAllBookHandler, getBookByIdHandler };
